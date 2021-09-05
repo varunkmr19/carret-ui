@@ -2,7 +2,7 @@ import React from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, TextField, Grid, Paper } from "@material-ui/core";
 import { useForm } from "./useForm"
-import axios from "axios";
+import axiosInstance from "../axiosApi";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -22,14 +22,22 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const handleSubmit = (e, values) => {
+const handleSubmit = async (e, values) => {
   e.preventDefault();
   const username = values.username;
   const password = values.password;
-  const fd = new FormData();
-  fd.append('username', username);
-  fd.append('password', password);
-  console.log(fd);
+  try{
+    const res = await axiosInstance.post('/token/obtain/', {
+      username: username,
+      password: password
+    });
+    axiosInstance.defaults.headers['Autorization'] = `JWT ${res.data.access}`;
+    localStorage.setItem('access_token', res.data.access);
+    localStorage.setItem('refresh_token', res.data.refresh);
+    return res;
+  } catch(err){
+    throw err;
+  }
 }
 
 

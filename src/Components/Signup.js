@@ -2,6 +2,8 @@ import React from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import { Button, TextField, Grid, Paper } from "@material-ui/core";
 import { useForm } from "./useForm"
+import axiosInstance from "../axiosApi";
+import axios from "axios";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,8 +23,18 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const handleSubmit = (e, values) => {
+const getCSRFToken = () => {
+  axios({
+    method: 'get',
+    url: 'http://localhost:8000/auth/get_csrf',
+  }).then(res => {
+    localStorage.setItem('csrf_token', res.data.data.csrf);
+  })
+}
+
+const handleSubmit = async (e, values) => {
   e.preventDefault();
+  getCSRFToken();
   const username = values.username;
   const email = values.email;
   const password = values.password;
@@ -31,12 +43,17 @@ const handleSubmit = (e, values) => {
     alert("Passwords do not match");
     return;
   }
-  const fd = new FormData();
-  fd.append('email', email);
-  fd.append('username', username);
-  fd.append('password', password);
-  fd.append('confirm_password', confirmPassword);
-  console.log(fd);
+  try {
+    const res = await axiosInstance.post("/register", {
+      username: username,
+      email: email,
+      password: password,
+      confirm_password: confirmPassword
+    });
+    return res;
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 
