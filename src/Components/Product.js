@@ -3,6 +3,7 @@ import axios from 'axios';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import ProductCard from './ProductCard';
+import alertify from 'alertifyjs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,11 +24,11 @@ const Product = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8000/api/products').then(res => {
+    axios.get(`${process.env.REACT_APP_BASE_URL}api/products`).then(res => {
       if (res.data.status === 200){
         setProducts(res.data.data);
       } else {
-        console.log("Something went wrong");
+        alertify.error('Something went wrong!');
       }
     }).catch(err => {
       console.log(err);
@@ -41,7 +42,7 @@ const Product = () => {
 
       await axios({
         method: 'post',
-        url: 'http://localhost:8000/api/verify-payment',
+        url: `${process.env.REACT_APP_BASE_URL}api/verify-payment`,
         data: fd,
         headers: {
           "Accept": "application/json",
@@ -49,7 +50,7 @@ const Product = () => {
         }
       }).then(res => {
         if (res.data){
-          alert(res.data.message);
+          alertify.success('Payment Successful!');
         }
       }).catch(err => {
         console.log(err);
@@ -77,17 +78,17 @@ const Product = () => {
     const res = await loadScript('https://checkout.razorpay.com/v1/checkout.js');
 
     if(!res) {
-      alert('Razorpay SDK failed to load. Are you online?')
+      alertify.error('Razorpay SDK failed to load. Are you online?')
       return
     }
     
     let fd = new FormData();
     fd.append('product_id', product_id);
-    fd.append('auth_key', '4fb087d2-5418-4b94-acff-550c69e50344');
+    fd.append('auth_key', process.env.REACT_APP_AUTH_KEY);
 
     const data = await axios({
       method: 'post',
-      url: 'http://localhost:8000/api/create-order',
+      url: `${process.env.REACT_APP_BASE_URL}api/create-order`,
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -98,8 +99,6 @@ const Product = () => {
     }).catch(err => {
       console.log(err);
     })
-
-    console.log(data.data.data);
 
     const options = {
       key_id: process.env.REACT_APP_RAZORPAY_KEY_ID,
