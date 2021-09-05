@@ -1,15 +1,21 @@
 import React from 'react';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import Button from '@material-ui/core/Button';
 
 const ProductCard = ({ product }) => {
   const priceInRupees = Number(product.price)/100;
   return (
-    <div className="card" key={product.id}>
-      <div className="card-content">
-        <p>{product.title}</p>
+    <Card key={product.id}>
+      <CardContent>
+        <h3>{product.title}</h3>
         <p>{product.description}</p>
-        <p>{`₹${priceInRupees}`}</p>
-      </div>
-    </div>
+        <p>Price: ₹{priceInRupees}</p>
+        <Button variant="contained" color="primary">
+          Buy Now
+        </Button>
+      </CardContent>
+    </Card>
   );
 }
 
